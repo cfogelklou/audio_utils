@@ -15,10 +15,8 @@
 #include <math.h>
 #include <float.h>
 
-#include "audiolib_types.h"
 #include "audutils_debug.h"
 #include "audutils_defines.h"
-#include "pcm_q.h"
 
 extern const float IIR_FLT_MIN;
 extern const float IIR_FLT_MAX;
