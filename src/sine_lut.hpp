@@ -12,7 +12,7 @@ express written permission of the author.
 #include <math.h>
 #include <stddef.h>
 
-#include "HelperMath.hpp"
+#include "helper_math.hpp"
 #include "audiolib_types.h"
 
 #define SINELUT_SIZE 4096

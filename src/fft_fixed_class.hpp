@@ -15,8 +15,8 @@ express written permission of the author.
 #include "FftClass.hpp"
 #include "DaTunerApi.h"
 #include "fft_c.h"
-#include "DaTunerDebug.h"
-#include "PcmQ.h"
+#include "audutils_debug.h"
+#include "pcm_q.h"
 #include "Platform.h"
   
 

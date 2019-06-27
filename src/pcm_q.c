@@ -9,16 +9,17 @@
 #include <string.h>
 #include <math.h>
 #include <stdint.h>
-#include "PcmQ.h"
+#include "pcm_q.h"
 #include "audiolib_types.h"
-//#include "DaTunerApi_old.h"
-#include "DaTunerDebug.h"
-#include "Platform.h"
+#include "audutils_debug.h"
+#include "audutils_defines.h"
+
+#define Platform_EnterOSCritical()
+#define Platform_ExitOSCritical()
 
   typedef int32_t msg_hdr_t;
 #define MSG_ALIGN (sizeof(msg_hdr_t))
 #define DOALIGN(_LEN)     (((_LEN) + MSG_ALIGN - 1) & (uint_t)(0-MSG_ALIGN))
-
 
 //lint -emacro( 767, PcmQ_LOCKIFDEFINED)
 /* [Internal] Conditional lock, lock only if the mutex exists. */

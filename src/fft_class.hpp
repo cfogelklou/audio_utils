@@ -13,11 +13,9 @@
 #include <math.h>
 
 #include "audiolib_types.h"
-#include "DaTunerApi.h"
 #include "fft_c.h"
-#include "DaTunerDebug.h"
-#include "PcmQ.h"
-#include "Platform.h"
+#include "audutils_debug.h"
+#include "pcm_q.h"
 
 //#define USE_FAST_MATH
 
@@ -27,24 +25,30 @@ typedef float fftc_t;
 typedef double fftc_t;
 #endif
 
+typedef fftc_t fftin_t;
+
+#ifndef E_FFTSIZE_MAX
+#define E_FFTSIZE_MAX 2048
+#endif
+
 namespace Fft {
 
-static const double SQRT2 = sqrt(2.0);
+  static const double SQRT2 = sqrt(2.0);
 
-bool getPower(double pAdRealIn[], double pAdImagIn[], double adPow[], int nSize);
+  bool getPower(double pAdRealIn[], double pAdImagIn[], double adPow[], int nSize);
 
-bool getAmplitude(double pAdRealIn[], double pAdImagIn[], double adPow[], int nSize);
+  bool getAmplitude(double pAdRealIn[], double pAdImagIn[], double adPow[], int nSize);
 
-double getFftPeakAmpFromPowers(double pAdPowers[], int fftSize);
+  double getFftPeakAmpFromPowers(double pAdPowers[], int fftSize);
 
-double getFftPeakAmpFromAmplitudes(double pAdAmplitudes[], int fftSize);
+  double getFftPeakAmpFromAmplitudes(double pAdAmplitudes[], int fftSize);
 
-double getFftRmsFromPowers(double pAdPowers[], int fftSize);
+  double getFftRmsFromPowers(double pAdPowers[], int fftSize);
 
-double getFftRmsFromAmplitudes(double pAdAmplitudes[], int fftSize);
+  double getFftRmsFromAmplitudes(double pAdAmplitudes[], int fftSize);
 
-int findPeak(double adMagnitude[], int magnitudeLen, int nMin, int nMax);
-}
+  int findPeak(double adMagnitude[], int magnitudeLen, int nMin, int nMax);
+};
 
 //---------------------------------------------------------------------------
 // An FFT class

@@ -10,7 +10,7 @@
 #ifndef __fft
 #define __fft
 
-#include "HelperMath.hpp"
+#include "helper_math.hpp"
 
 #define fft_float_t double
 

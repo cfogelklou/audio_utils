@@ -1,3 +1,4 @@
+
 /******************************************************************************
   Copyright 2014 Chris Fogelklou, Applaud Apps (Applicaudia)
 
@@ -6,8 +7,13 @@
 
   @author: chris.fogelklou@gmail.com
 *******************************************************************************/
-#include "note_converter.hpp"
+#include <float.h>
+#include "audutils_debug.h"
 #include "audutils_defines.h"
+#include "Iir.hpp"
 
-double NoteConverter::DEFAULT_REF_FREQ = 440;
-const double NoteConverter::mOneOverLn2 = 1.0 / LN2;
+
+const float IIR_FLT_MIN = FLT_MIN;
+const float IIR_FLT_MAX = FLT_MAX;
+
+

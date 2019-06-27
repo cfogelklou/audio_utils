@@ -7,10 +7,14 @@
   @author: chris.fogelklou@gmail.com
 *******************************************************************************/ 
 #include "fft_c.h"
-#include "MemPools.h"
-#include "DaTunerDebug.h"
+#include "audutils_debug.h"
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
+
+#define MALLOC malloc
+#define FREE free
+#define REALLOC realloc
 
 #define FFT_DBG
 #ifdef FFT_DBG

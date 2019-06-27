@@ -1,4 +1,4 @@
-#include "SineLUT.hpp"
+#include "sine_lut.hpp"
 
 // Singleton for float Sine lookups
 template<>

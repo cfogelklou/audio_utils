@@ -4,7 +4,7 @@
   Command: ResampleCodeGen(6, 12, 60, 0, 68, 'ownsampleX6Coeffs')
 */
 // Include files
-#include "AudResampler.h"
+#include "aud_resampler.h"
 
 
 // The FIR coefficients for this filter 

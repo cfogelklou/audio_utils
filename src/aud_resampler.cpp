@@ -9,10 +9,10 @@ express written permission of the author.
 
 #include <math.h>
 #include <string.h>
-#include "AudResampler.h"
-#include "DaTunerDebug.h"
-#include "DaTunerDefs.h"
-#include "Iir.hpp"
+#include "aud_resampler.h"
+#include "audutils_debug.h"
+#include "audutils_defines.h"
+#include "iir.hpp"
 
 #define float40_t double
 #define AR_INIT_COMPLETE 0x7E5A5555

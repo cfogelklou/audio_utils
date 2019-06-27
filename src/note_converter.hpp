@@ -12,8 +12,8 @@
 
 #include <math.h>
 #include "audiolib_types.h"
-#include "DaTunerDefs.h"
-#include "DaTunerDebug.h"
+#include "audutils_defines.h"
+#include "audutils_debug.h"
 
 class NoteConverter {
 

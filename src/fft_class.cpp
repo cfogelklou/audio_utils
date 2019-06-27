@@ -1,4 +1,4 @@
-#include "FftClass.hpp"
+#include "fft_class.hpp"
 
 namespace Fft {
 
