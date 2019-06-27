@@ -373,7 +373,7 @@ bool IIR_InitQ(
   bool  scaleA0TO1 = true)
 {
   floatT fOctaves = IIR_QToOctaves(Q);
-  return IIR_InitBW(pThis, type, dbGain, freq, srate, fOctaves);
+  return IIR_InitBW(pThis, type, dbGain, freq, srate, fOctaves, scaleA0TO1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
