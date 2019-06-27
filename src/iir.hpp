@@ -38,13 +38,13 @@ typedef struct tIIR_CoefDesignDbl
 typedef struct tIIR_CoefDesignFlt
 {
   // Denominator  - Coefficients to past outputs
-  double  a2; 
-  double  a1;
-  double  a0;
+  float  a2; 
+  float  a1;
+  float  a0;
   // Nominator    - Coefficients to input and past input samples
-  double  b2;
-  double  b1; 
-  double  b0;    
+  float  b2;
+  float  b1; 
+  float  b0;    
 } IIR_CoefDesignFlt;
 
 //----------------------------------------------------------------------------
