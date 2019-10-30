@@ -16,7 +16,7 @@
 #define FREE free
 #define REALLOC realloc
 
-#define FFT_DBG
+//#define FFT_DBG
 #ifdef FFT_DBG
 #include <stdio.h>
 static FILE * pf = 0;
@@ -309,22 +309,23 @@ bool_t fft_fftIfft (
     {
         uint_t i;
         ASSERT( ( nNumSamples == pFft->lastFftSize ) && (pAdRealIn != NULL) && (xr != NULL) && (xi != NULL) );
+        const uint_t* const pReverseBitsLut = pFft->pReverseBitsLut;
 
         // Reverse ordering of samples so FFT can be done in place.
         if (pAdImagIn == NULL)
         {
             for ( i = 0; i < nNumSamples; i++ ) 
             {
-                const uint_t rev = pFft->pReverseBitsLut[ i ];
+                const uint_t rev = pReverseBitsLut[ i ];
                 xr[rev] = pAdRealIn[i];
-                xi[rev] = 0.0;
             }
+            memset(xi, 0, sizeof(fft_float_t) * nNumSamples);
         }
         else
         {
             for ( i = 0; i < nNumSamples; i++ ) 
             {
-                const uint_t rev = pFft->pReverseBitsLut[ i ];
+                const uint_t rev = pReverseBitsLut[ i ];
                 xr[rev] = pAdRealIn[i];
                 xi[rev] = pAdImagIn[i];
             }
