@@ -10,7 +10,11 @@
 #ifndef __fft
 #define __fft
 
-#include "helper_math.hpp"
+//#include "helper_math.hpp"
+#include <stdint.h>
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
 
 #define fft_float_t double
 
@@ -24,12 +28,12 @@ typedef struct
 
 typedef struct _FftFloat_t
 {
-  uint_t lastFftSize;
-  uint_t bitsNeeded;
-  uint_t *pReverseBitsLut;
+  unsigned int lastFftSize;
+  unsigned int bitsNeeded;
+  unsigned int *pReverseBitsLut;
   FftLut_t *pFftLut;
   FftLut_t *pIfftLut;
-  bool_t allocatedLocally;
+  bool allocatedLocally;
 } FftFloat_t;
 
 
@@ -37,37 +41,37 @@ typedef struct _FftFloat_t
 extern "C" {
 #endif
 
-  bool_t FFT_FFT ( 
+  bool FFT_FFT ( 
     FftFloat_t * const pFft, 
     const fft_float_t * const adRealIn, 
     const fft_float_t * const adImagIn, 
     fft_float_t * const adRealOut, 
     fft_float_t * const adImagOut, 
-    uint_t const nSize);
+    unsigned int const nSize);
 
-  bool_t FFT_IFFT (             
+  bool FFT_IFFT (             
     FftFloat_t *pFft, 
     const fft_float_t * const adRealIn, 
     const fft_float_t * const adImagIn, 
     fft_float_t * const adRealOut, 
     fft_float_t * const adImagOut, 
-    uint_t const nSize);
+    unsigned int const nSize);
 
-  bool_t FFT_Phase( fft_float_t *adRealIn, fft_float_t *adImagIn, fft_float_t *adPhase,  uint_t nSize );
-  bool_t FFT_Magnitude( fft_float_t *adRealIn, fft_float_t *adImagIn, fft_float_t *adMagnitude,  uint_t nSize );
-  bool_t FFT_MagnitudePhase( fft_float_t *pAdRealIn, fft_float_t *pAdImagIn, fft_float_t *pAdMagnitude, fft_float_t *pAdPhase, uint_t nSize );
-  bool_t FFT_IsPowerOfTwo ( const int_t nX );
-  fft_float_t  FFT_IndexToFrequency ( uint_t nNumSamples, uint_t nIndex, fft_float_t fs );
+  bool FFT_Phase( fft_float_t *adRealIn, fft_float_t *adImagIn, fft_float_t *adPhase,  unsigned int nSize );
+  bool FFT_Magnitude( fft_float_t *adRealIn, fft_float_t *adImagIn, fft_float_t *adMagnitude,  unsigned int nSize );
+  bool FFT_MagnitudePhase( fft_float_t *pAdRealIn, fft_float_t *pAdImagIn, fft_float_t *pAdMagnitude, fft_float_t *pAdPhase, unsigned int nSize );
+  bool FFT_IsPowerOfTwo ( const int nX );
+  fft_float_t  FFT_IndexToFrequency ( unsigned int nNumSamples, unsigned int nIndex, fft_float_t fs );
 
   // Initializes or re-initializes the FFT.
-  FftFloat_t *Fft_Init( FftFloat_t *pFft, uint_t nSize );
+  FftFloat_t *Fft_Init( FftFloat_t *pFft, unsigned int nSize );
 
   void Fft_DeInit( FftFloat_t *pFft );
 
-  bool_t fft_NumberOfBitsNeeded ( uint_t nPowerOfTwo , uint_t * pnBitsNeeded);
-  uint_t fft_ReverseBits ( uint_t nIndex, uint_t nNumBits );
+  bool fft_NumberOfBitsNeeded ( unsigned int nPowerOfTwo , unsigned int * pnBitsNeeded);
+  unsigned int fft_ReverseBits ( unsigned int nIndex, unsigned int nNumBits );
 
-  uint_t fft_IntegerLog2(uint_t x);
+  unsigned int fft_IntegerLog2(unsigned int x);
 
 #if defined( __cplusplus )
 }
