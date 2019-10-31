@@ -403,8 +403,10 @@ bool_t fft_fftIfft (
 #endif
 
                         {
+#ifdef FFT_DBG
                             const fft_float_t oldxrj = xr[ j ];
                             const fft_float_t oldxij = xi[ j ];
+#endif
                             xr[ j ] = xr[ j ] + tr;
                             xi[ j ] = xi[ j ] + ti;
 
