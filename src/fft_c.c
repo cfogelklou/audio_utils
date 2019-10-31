@@ -16,7 +16,7 @@
 #define FREE free
 #define REALLOC realloc
 #define ASSERT(x)
-#define ASSERT_FN(x)
+#define ASSERT_FN(x) if(x)do{;}while(0)
 #define TRACE_WARNING(x)
 
 
