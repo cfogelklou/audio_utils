@@ -47,6 +47,14 @@ static bool fft_fftIfft (
         fft_float_t * const pAdRealOut,
         fft_float_t * const pAdImagOut,
         const unsigned int nNumSamples);
+static bool fft_fftIfftf(
+  FftFloat_t* const pFft,
+  const bool bInverseTransform,
+  const float* const pAdRealIn,
+  fft_float_t* const pAdRealOut,
+  fft_float_t* const pAdImagOut,
+  const unsigned int nNumSamples);
+
 static bool  fft_InitTwiddles( FftFloat_t *pFft );
 
 //---------------------------------------------------------------------------
@@ -243,6 +251,18 @@ bool   FFT_FFT (
     return status;
 }
 
+//---------------------------------------------------------------------------
+bool   FFT_FFTf(
+  FftFloat_t* const pFft,
+  const float* const adRealIn,
+  fft_float_t* const adRealOut,
+  fft_float_t* const adImagOut,
+  unsigned int const nSize)
+
+{
+  bool status = fft_fftIfftf(pFft, false, adRealIn, adRealOut, adImagOut, nSize);
+  return status;
+}
 
 //---------------------------------------------------------------------------
 bool   FFT_IFFT ( 
@@ -308,151 +328,183 @@ bool FFT_MagnitudePhase( fft_float_t *pAdRealIn, fft_float_t *pAdImagIn, fft_flo
     return true;
 }
 
-//---------------------------------------------------------------------------
-bool fft_fftIfft (   
-        FftFloat_t * const pFft, 
-        const bool bInverseTransform,
-        const fft_float_t * const pAdRealIn,
-        const fft_float_t * const pAdImagIn,
-        fft_float_t * const xr,
-        fft_float_t * const xi,
-        const unsigned int nNumSamples)
-{
-    if (pFft != 0)
+static bool fft_afterReverse(
+  FftFloat_t* const pFft,
+  const bool bInverseTransform,
+  fft_float_t* const xr,
+  fft_float_t* const xi
+) {
+  if (pFft != 0) {
+    const unsigned int nNumSamples = pFft->lastFftSize;
+    // Declare some local variables and start the FFT.
     {
+      unsigned int nBlockSize;
+
+      const FftLut_t* const pLut = (!bInverseTransform) ? pFft->pFftLut : pFft->pIfftLut;
+      unsigned int iter = 0;
+      unsigned int nBlockEnd = 1;
+
+#ifdef FFT_DBG
+      unsigned int innerloops = 0;
+#endif
+
+      for (nBlockSize = 2; nBlockSize <= nNumSamples; nBlockSize <<= 1) {
         unsigned int i;
-        ASSERT( ( nNumSamples == pFft->lastFftSize ) && (pAdRealIn != NULL) && (xr != NULL) && (xi != NULL) );
-        const unsigned int* const pReverseBitsLut = pFft->pReverseBitsLut;
+        const fft_float_t sm2 = pLut[iter].sm2;
+        const fft_float_t sm1 = pLut[iter].sm1;
+        const fft_float_t cm2 = pLut[iter].cm2;
+        const fft_float_t cm1 = pLut[iter].cm1;
+        const fft_float_t w = 2 * cm1;
+        fft_float_t ar[3], ai[3];
+        ++iter;
 
-        // Reverse ordering of samples so FFT can be done in place.
-        if (pAdImagIn == NULL)
-        {
-            for ( i = 0; i < nNumSamples; i++ ) 
+        for (i = 0; i < nNumSamples; i += nBlockSize) {
+          unsigned int j, n;
+
+          ar[2] = cm2;
+          ar[1] = cm1;
+
+          ai[2] = sm2;
+          ai[1] = sm1;
+
+          for (j = i, n = 0; n < nBlockEnd; j++, n++) {
+
+            fft_float_t tr, ti;     /* temp real, temp imaginary */
+            const unsigned int k = j + nBlockEnd;
+
+            ar[0] = w * ar[1] - ar[2];
+            ar[2] = ar[1];
+            ar[1] = ar[0];
+
+            ai[0] = w * ai[1] - ai[2];
+            ai[2] = ai[1];
+            ai[1] = ai[0];
+
+
+            tr = ar[0] * xr[k] - ai[0] * xi[k];
+            ti = ar[0] * xi[k] + ai[0] * xr[k];
+
+#ifdef FFT_DBG
+            if (pf != 0)
             {
-                const unsigned int rev = pReverseBitsLut[ i ];
-                xr[rev] = pAdRealIn[i];
+              fprintf(pf, "Innerloops: %d\n", innerloops++);
+              fprintf(pf, "tr = ar * xr[ k=%d ] - ai * xi[ k=%d ] = (%f * %f) - (%f * %f) = %f\n", k, k, ar[0], xr[k], ai[0], xi[k], tr);
+              fprintf(pf, "ti = ar * xi[ k=%d ] + ai * xr[ k=%d ] = (%f * %f) + (%f * %f) = %f\n", k, k, ar[0], xi[k], ai[0], xr[k], ti);
             }
-            memset(xi, 0, sizeof(fft_float_t) * nNumSamples);
-        }
-        else
-        {
-            for ( i = 0; i < nNumSamples; i++ ) 
+#endif
+
+            xr[k] = xr[j] - tr;
+            xi[k] = xi[j] - ti;
+
+#ifdef FFT_DBG
+            if (pf != 0)
             {
-                const unsigned int rev = pReverseBitsLut[ i ];
-                xr[rev] = pAdRealIn[i];
-                xi[rev] = pAdImagIn[i];
+              fprintf(pf, "xr[ k=%d ] = xr[ j=%d ] - tr = %f - (%f) = %f\n", k, j, xr[j], tr, xr[k]);
+              fprintf(pf, "xi[ k=%d ] = xi[ j=%d ] - ti = %f - (%f) = %f\n", k, j, xi[j], ti, xi[k]);
             }
-        }
-
-        // Declare some local variables and start the FFT.
-        {
-            unsigned int nBlockSize;
-
-            const FftLut_t * const pLut = (!bInverseTransform) ? pFft->pFftLut : pFft->pIfftLut;
-            unsigned int iter = 0;
-            unsigned int nBlockEnd = 1;
-
-#ifdef FFT_DBG
-            unsigned int innerloops = 0;
 #endif
 
-            for ( nBlockSize = 2; nBlockSize <= nNumSamples; nBlockSize <<= 1 )
             {
-                unsigned int i;
-                const fft_float_t sm2 = pLut[ iter ].sm2;
-                const fft_float_t sm1 = pLut[ iter ].sm1;
-                const fft_float_t cm2 = pLut[ iter ].cm2;
-                const fft_float_t cm1 = pLut[ iter ].cm1;
-                const fft_float_t w = 2 * cm1;
-                fft_float_t ar[3], ai[3];
-                ++iter;
-
-                for ( i=0; i < nNumSamples; i += nBlockSize )
-                {
-                    unsigned int j, n;
-
-                    ar[2] = cm2;
-                    ar[1] = cm1;
-
-                    ai[2] = sm2;
-                    ai[1] = sm1;
-
-                    for ( j = i, n = 0; n < nBlockEnd; j++, n++ )
-                    {
-
-                        fft_float_t tr, ti;     /* temp real, temp imaginary */
-                        const unsigned int k = j + nBlockEnd;
-
-                        ar[0] = w * ar[1] - ar[2];
-                        ar[2] = ar[1];
-                        ar[1] = ar[0];
-
-                        ai[0] = w * ai[1] - ai[2];
-                        ai[2] = ai[1];
-                        ai[1] = ai[0];
-
-
-                        tr = ar[ 0 ] * xr[ k ] - ai[ 0 ] * xi[ k ];
-                        ti = ar[ 0 ] * xi[ k ] + ai[ 0 ] * xr[ k ];
+#ifdef FFT_DBG
+              const fft_float_t oldxrj = xr[j];
+              const fft_float_t oldxij = xi[j];
+#endif
+              xr[j] = xr[j] + tr;
+              xi[j] = xi[j] + ti;
 
 #ifdef FFT_DBG
-                        if (pf != 0)
-                        {
-                            fprintf(pf,"Innerloops: %d\n", innerloops++);
-                            fprintf(pf, "tr = ar * xr[ k=%d ] - ai * xi[ k=%d ] = (%f * %f) - (%f * %f) = %f\n", k, k, ar[ 0 ] , xr[ k ], ai[ 0 ] , xi[ k ], tr);
-                            fprintf(pf, "ti = ar * xi[ k=%d ] + ai * xr[ k=%d ] = (%f * %f) + (%f * %f) = %f\n", k, k, ar[ 0 ] , xi[ k ], ai[ 0 ] , xr[ k ], ti);
-                        }
+              if (pf != 0)
+              {
+                fprintf(pf, "xr[ j=%d ] = xr[ j=%d ] + tr = %f + %f = %f\n", j, j, oldxrj, tr, xr[j]);
+                fprintf(pf, "xi[ j=%d ] = xi[ j=%d ] + ti = %f + %f = %f\n", j, j, oldxij, ti, xi[j]);
+              }
 #endif
-
-                        xr[ k ] = xr[ j ] - tr;
-                        xi[ k ] = xi[ j ] - ti;
-
-#ifdef FFT_DBG
-                        if (pf != 0)
-                        {
-                            fprintf(pf, "xr[ k=%d ] = xr[ j=%d ] - tr = %f - (%f) = %f\n", k, j, xr[ j ], tr, xr[k] );
-                            fprintf(pf, "xi[ k=%d ] = xi[ j=%d ] - ti = %f - (%f) = %f\n", k, j, xi[ j ], ti, xi[k] );
-                        }
-#endif
-
-                        {
-#ifdef FFT_DBG
-                            const fft_float_t oldxrj = xr[ j ];
-                            const fft_float_t oldxij = xi[ j ];
-#endif
-                            xr[ j ] = xr[ j ] + tr;
-                            xi[ j ] = xi[ j ] + ti;
-
-#ifdef FFT_DBG
-                            if (pf != 0)
-                            {
-                                fprintf(pf, "xr[ j=%d ] = xr[ j=%d ] + tr = %f + %f = %f\n", j, j, oldxrj, tr, xr[ j ] );
-                                fprintf(pf, "xi[ j=%d ] = xi[ j=%d ] + ti = %f + %f = %f\n", j, j, oldxij, ti, xi[ j ] );
-                            }
-#endif
-                        }
-                    }
-                }
-
-                nBlockEnd = nBlockSize;
             }
+          }
         }
 
-        // Normalize
-        if ( bInverseTransform )
-        {
-            fft_float_t dDenom = 1.0 / (fft_float_t)nNumSamples;
-
-            for ( i=0; i < nNumSamples; i++ )
-            {
-                xr[i] *= dDenom;
-                xi[i] *= dDenom;
-            }
-        }
+        nBlockEnd = nBlockSize;
+      }
     }
-    return true;
+
+    // Normalize
+    if (bInverseTransform)
+    {
+      fft_float_t dDenom = 1.0 / (fft_float_t)nNumSamples;
+
+      for (unsigned int i = 0; i < nNumSamples; i++)
+      {
+        xr[i] *= dDenom;
+        xi[i] *= dDenom;
+      }
+    }
+  }
+  return true;
 }
 
+//---------------------------------------------------------------------------
+bool fft_fftIfft(
+  FftFloat_t* const pFft,
+  const bool bInverseTransform,
+  const fft_float_t* const pXr,
+  const fft_float_t* const pXi,
+  fft_float_t* const xr,
+  fft_float_t* const xi,
+  const unsigned int nNumSamples)
+{
+  if (pFft != 0) {
+    unsigned int i;
+    const fft_float_t* const pAdRealIn = pXr;
+    const fft_float_t* const pAdImagIn = pXi;
+    ASSERT((nNumSamples == pFft->lastFftSize) 
+      && (pAdRealIn != NULL) && (xr != NULL) && (xi != NULL));
+    const unsigned int* const pReverseBitsLut = pFft->pReverseBitsLut;
+
+    // Reverse ordering of samples so FFT can be done in place.
+    if (pAdImagIn == NULL) {
+      for (i = 0; i < nNumSamples; i++) {
+        const unsigned int rev = pReverseBitsLut[i];
+        xr[rev] = pAdRealIn[i];
+      }
+      memset(xi, 0, sizeof(fft_float_t) * nNumSamples);
+    }
+    else {
+      for (i = 0; i < nNumSamples; i++) {
+        const unsigned int rev = pReverseBitsLut[i];
+        xr[rev] = pAdRealIn[i];
+        xi[rev] = pAdImagIn[i];
+      }
+    }
+  }
+
+  return fft_afterReverse(pFft, bInverseTransform, xr, xi);
+}
+
+//---------------------------------------------------------------------------
+bool fft_fftIfftf(
+  FftFloat_t* const pFft,
+  const bool bInverseTransform,
+  const float* const pXr,
+  fft_float_t* const xr,
+  fft_float_t* const xi,
+  const unsigned int nNumSamples)
+{
+  if (pFft != 0) {
+    unsigned int i;
+    ASSERT((nNumSamples == pFft->lastFftSize)
+      && (pAdRealIn != NULL) && (xr != NULL) && (xi != NULL));
+    const unsigned int* const pReverseBitsLut = pFft->pReverseBitsLut;
+
+    // Reverse ordering of samples so FFT can be done in place.
+    for (i = 0; i < nNumSamples; i++) {
+      const unsigned int rev = pReverseBitsLut[i];
+      xr[rev] = pXr[i];
+    }
+    memset(xi, 0, sizeof(fft_float_t) * nNumSamples);
+  }
+
+  return fft_afterReverse(pFft, bInverseTransform, xr, xi);
+}
 
 //---------------------------------------------------------------------------
 static bool  fft_InitTwiddles( FftFloat_t *pFft )

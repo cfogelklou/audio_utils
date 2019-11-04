@@ -49,6 +49,13 @@ extern "C" {
     fft_float_t * const adImagOut, 
     unsigned int const nSize);
 
+  bool   FFT_FFTf(
+    FftFloat_t* const pFft,
+    const float* const adRealIn,
+    fft_float_t* const adRealOut,
+    fft_float_t* const adImagOut,
+    unsigned int const nSize);
+
   bool FFT_IFFT (             
     FftFloat_t *pFft, 
     const fft_float_t * const adRealIn, 
