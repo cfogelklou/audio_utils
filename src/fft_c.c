@@ -159,32 +159,31 @@ bool  FFT_IsPowerOfTwo ( const int nX )
 
 
 //---------------------------------------------------------------------------
-bool  fft_NumberOfBitsNeeded ( unsigned int nPowerOfTwo , unsigned int * pnBitsNeeded )
+bool  fft_NumberOfBitsNeeded(
+  unsigned int nPowerOfTwo,
+  unsigned int* pnBitsNeeded)
 {
-    
-    unsigned int i = 0;
-    bool success = false;
-    unsigned int bitsNeeded = 0;
 
-    if ( nPowerOfTwo < 2 )
-    {
-        bitsNeeded = 0;
-    }
+  unsigned int i = 0;
+  bool success = false;
+  unsigned int bitsNeeded = 0;
 
-    while ((i < 32) && (success == false))
-    {
-        if ( nPowerOfTwo & (1 << i) ) 
-        {
-            bitsNeeded = i;
-            success = true;
-        }
-        ++i;
+  if (nPowerOfTwo < 2) {
+    bitsNeeded = 0;
+  }
+
+  while ((i < 32) && (success == false)){
+    if (nPowerOfTwo & (1 << i)) {
+      bitsNeeded = i;
+      success = true;
     }
-    if (pnBitsNeeded)
-    {
-        *pnBitsNeeded = bitsNeeded;
-    }
-    return success;
+    ++i;
+  }
+  
+  if (pnBitsNeeded){
+    *pnBitsNeeded = bitsNeeded;
+  }
+  return success;
 }
 
 
