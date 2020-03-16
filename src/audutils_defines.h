@@ -90,7 +90,7 @@ static int doround(double x) {
 #endif // #ifndef roundROUND
 
 #ifndef ABS
-#define ABS(x) ( ((x) < 0) ? (-x) : (x) )
+#define ABS(x) ( ((x) < 0) ? (-(x)) : (x) )
 #endif
 
 #ifndef COMPILE_TIME_ASSERT
